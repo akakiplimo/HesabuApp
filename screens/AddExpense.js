@@ -1,10 +1,94 @@
-import {View, Text} from 'react-native';
-import React from 'react';
+import {Image, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import React, {useState} from 'react';
+import ScreenWrapper from '../components/ScreenWrapper';
+import {categoryBG, colors} from '../theme';
+import BackButton from '../components/BackButton';
+import {useNavigation} from '@react-navigation/native';
+import {categories} from '../constants';
 
 export default function AddExpense() {
+  const [title, setTitle] = useState('');
+  const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState('');
+
+  const navigation = useNavigation();
+
+  const handleAddExpense = () => {
+    if (title && amount && category) {
+      // ready to add trip
+      navigation.goBack();
+    } else {
+      // Show error
+    }
+  };
   return (
-    <View>
-      <Text>AddExpense</Text>
-    </View>
+    <ScreenWrapper>
+      <View className="flex justify-between h-full mx-4">
+        <View>
+          <View className="relative mt-5">
+            <View className="absolute top-0 left-0">
+              <BackButton />
+            </View>
+
+            <Text className={`${colors.heading} text-xl font-bold text-center`}>
+              Add Expense
+            </Text>
+          </View>
+
+          <View className="flex-row justify-center my-3 mt-5">
+            <Image
+              className="w-96 h-96"
+              source={require('../assets/images/calc.png')}
+            />
+          </View>
+          <View>
+            <Text className={`${colors.heading} text-lg font-bold my-2`}>
+              For What?
+            </Text>
+            <TextInput
+              value={title}
+              onChangeText={value => setTitle(value)}
+              className="p-4 bg-white rounded-full mb-4"
+            />
+            <Text className={`${colors.heading} text-lg font-bold my-2`}>
+              How Much?
+            </Text>
+            <TextInput
+              value={amount}
+              onChangeText={value => setAmount(value)}
+              className="p-4 bg-white rounded-full mb-4"
+            />
+          </View>
+          <View className="space-x-2">
+            <Text className="text-lg font-bold">Category</Text>
+            <View className="flex-row flex-wrap items-center">
+              {categories.map(cat => {
+                let bgColor = 'bg-white';
+                if (cat.value == category) bgColor = 'bg-green-200';
+                return (
+                  <TouchableOpacity
+                    onPress={() => setCategory(cat.value)}
+                    key={cat.value}
+                    className={`rounded-full ${bgColor} px-4 p-3 mb-2 mx-1`}>
+                    <Text>{cat.title}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+
+        <View>
+          <TouchableOpacity
+            onPress={handleAddExpense}
+            style={{backgroundColor: colors.button}}
+            className="my-6 rounded-full p-3 shadow-sm">
+            <Text className="text-center text-white text-lg font-bold">
+              Add Expense
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScreenWrapper>
   );
 }
