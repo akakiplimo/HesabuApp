@@ -1,7 +1,7 @@
 export const colors = {
   heading: 'text-gray-700',
   primary: '#ff9000',
-  button: '#85bb65',
+  button: '#65bb65',
 };
 
 export const categoryBG = {
