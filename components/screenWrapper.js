@@ -7,7 +7,6 @@ const ScreenWrapper = ({children}) => {
     : Platform.OS === 'ios'
     ? '30'
     : '0';
-  console.log('height', statusBarHeight);
 
   return <View style={{paddingTop: statusBarHeight}}>{children}</View>;
 };
