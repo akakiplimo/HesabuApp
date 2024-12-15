@@ -11,20 +11,44 @@ import ScreenWrapper from '../components/ScreenWrapper';
 import {colors} from '../theme';
 import BackButton from '../components/BackButton';
 import {useNavigation} from '@react-navigation/native';
+import Snackbar from 'react-native-snackbar';
+import {createUserWithEmailAndPassword} from 'firebase/auth';
+import {auth} from '../config/firebase';
+import {setUserLoading} from '../redux/slices/user';
+import {useDispatch, useSelector} from 'react-redux';
+import Loading from '../components/Loading';
 
 export default function SignUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const navigation = useNavigation();
+  const {userLoading} = useSelector(state => state.user);
 
-  const handleSubmit = () => {
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+
+  const handleSubmit = async () => {
     if (email && password) {
       // ready to add trip
-      navigation.goBack();
-      navigation.navigate('Home');
+      // navigation.goBack();
+      // navigation.navigate('Home');
+      try {
+        dispatch(setUserLoading(true));
+        await createUserWithEmailAndPassword(auth, email, password);
+        dispatch(setUserLoading(false));
+      } catch (error) {
+        dispatch(setUserLoading(false));
+        Snackbar.show({
+          text: error.message,
+          backgroundColor: 'red',
+        });
+      }
     } else {
       // Show error
+      Snackbar.show({
+        text: 'Email & Password are required',
+        backgroundColor: 'red',
+      });
     }
   };
   return (
@@ -69,14 +93,18 @@ export default function SignUp() {
         </View>
 
         <View>
-          <TouchableOpacity
-            onPress={handleSubmit}
-            style={{backgroundColor: colors.button}}
-            className="my-6 rounded-full p-3 shadow-sm">
-            <Text className="text-center text-white text-lg font-bold">
-              Sign Up
-            </Text>
-          </TouchableOpacity>
+          {userLoading ? (
+            <Loading />
+          ) : (
+            <TouchableOpacity
+              onPress={handleSubmit}
+              style={{backgroundColor: colors.button}}
+              className="my-6 rounded-full p-3 shadow-sm">
+              <Text className="text-center text-white text-lg font-bold">
+                Sign Up
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </ScreenWrapper>

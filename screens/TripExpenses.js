@@ -1,12 +1,13 @@
 import {View, Text, TouchableOpacity, Image, FlatList} from 'react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import ScreenWrapper from '../components/ScreenWrapper';
 import {colors} from '../theme';
-import randomImage from '../assets/images/randomImage';
 import EmptyList from '../components/EmptyList';
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import BackButton from '../components/BackButton';
 import ExpenseCard from '../components/ExpenseCard';
+import {expensesRef} from '../config/firebase';
+import {getDocs, query, where} from 'firebase/firestore';
 
 const items = [
   {id: 1, title: 'ate burger', amount: 2, category: 'food'},
@@ -16,9 +17,35 @@ const items = [
 ];
 
 export default function TripExpenses(props) {
-  const {id, country, place} = props.route.params;
+  const {id, country, place, userId} = props.route.params;
+  const [expenses, setExpenses] = useState([]);
 
   const navigation = useNavigation();
+
+  const isFocused = useIsFocused();
+
+  const fetchExpenses = async () => {
+    const queryExpenses = query(
+      expensesRef,
+      where('userId', '==', userId),
+      where('tripId', '==', id),
+    );
+    const querySnapshot = await getDocs(queryExpenses);
+    let data = [];
+    querySnapshot.forEach(doc => {
+      console.log('results', doc);
+
+      data.push({...doc.data(), id: doc.id});
+    });
+
+    setExpenses(data);
+  };
+
+  useEffect(() => {
+    if (isFocused) {
+      fetchExpenses();
+    }
+  }, [isFocused]);
 
   return (
     <ScreenWrapper className="flex-1">
@@ -51,7 +78,9 @@ export default function TripExpenses(props) {
               Expenses
             </Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate('AddExpense')}
+              onPress={() =>
+                navigation.navigate('AddExpense', {id, country, place})
+              }
               className="p-2 px-3 bg-white border border-gray-200 rounded-full">
               <Text className={colors.heading}>Add Expense</Text>
             </TouchableOpacity>
@@ -59,7 +88,7 @@ export default function TripExpenses(props) {
 
           <View className="mt-4" style={{height: 450}}>
             <FlatList
-              data={items}
+              data={expenses}
               ListEmptyComponent={
                 <EmptyList message="You have not added any expenses yet" />
               }

@@ -1,23 +1,47 @@
 import {View, Text, TouchableOpacity, Image, FlatList} from 'react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import ScreenWrapper from '../components/ScreenWrapper';
 import {colors} from '../theme';
 import randomImage from '../assets/images/randomImage';
 import EmptyList from '../components/EmptyList';
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {signOut} from 'firebase/auth';
+import {auth, tripsRef} from '../config/firebase';
+import {useSelector} from 'react-redux';
+import {getDocs, query, where} from 'firebase/firestore';
 
-const items = [
-  {id: 1, place: 'Malindi', country: 'Kenya'},
-  {id: 2, place: 'Zanzibar', country: 'Tanzania'},
-  {id: 3, place: 'Kigali', country: 'Rwanda'},
-  {id: 4, place: 'Juba', country: 'South Sudan'},
-  {id: 5, place: 'Mogadishu', country: 'Somalia'},
-  {id: 6, place: 'Bujumbura', country: 'Burundi'},
-  {id: 7, place: 'Kampala', country: 'Uganda'},
-];
+// data structure
+// const items = [
+//   {id: 1, place: 'Malindi', country: 'Kenya'},
+// ];
 
 export default function HomeScreen() {
   const navigation = useNavigation();
+  const {user} = useSelector(state => state.user);
+  const [trips, setTrips] = useState([]);
+
+  const isFocused = useIsFocused();
+
+  const fetchTrips = async () => {
+    const queryTrips = query(tripsRef, where('userId', '==', user.uid));
+    const querySnapshot = await getDocs(queryTrips);
+    let data = [];
+    querySnapshot.forEach(doc => {
+      data.push({...doc.data(), id: doc.id});
+    });
+
+    setTrips(data);
+  };
+
+  useEffect(() => {
+    if (isFocused) {
+      fetchTrips();
+    }
+  }, [isFocused]);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+  };
 
   return (
     <ScreenWrapper className="flex-1">
@@ -25,7 +49,9 @@ export default function HomeScreen() {
         <Text className={`${colors.heading} font-bold text-3xl shadow-sm`}>
           Hesabu Poa
         </Text>
-        <TouchableOpacity className="p-2 px-3 bg-white border border-gray-200 rounded-full">
+        <TouchableOpacity
+          onPress={handleLogout}
+          className="p-2 px-3 bg-white border border-gray-200 rounded-full">
           <Text className={colors.heading}>Logout</Text>
         </TouchableOpacity>
       </View>
@@ -51,7 +77,7 @@ export default function HomeScreen() {
 
         <View className="mt-4" style={{height: 450}}>
           <FlatList
-            data={items}
+            data={trips}
             ListEmptyComponent={
               <EmptyList message="You have not recorded any trips yet" />
             }
@@ -65,7 +91,12 @@ export default function HomeScreen() {
             renderItem={({item}) => {
               return (
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('TripExpenses', {...item})}
+                  onPress={() =>
+                    navigation.navigate('TripExpenses', {
+                      ...item,
+                      userId: user.uid,
+                    })
+                  }
                   className="bg-white p-5 mx-1 rounded-2xl mb-3 shadow-sm">
                   <View>
                     <Image source={randomImage()} className="w-36 h-36 mb-2" />

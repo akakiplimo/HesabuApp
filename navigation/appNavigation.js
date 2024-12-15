@@ -1,6 +1,10 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {useDispatch, useSelector} from 'react-redux';
+import {onAuthStateChanged} from 'firebase/auth';
+import {setUser} from '../redux/slices/user';
+import {auth} from '../config/firebase';
 import HomeScreen from '../screens/HomeScreen';
 import AddTrip from '../screens/AddTrip';
 import AddExpense from '../screens/AddExpense';
@@ -8,12 +12,18 @@ import TripExpenses from '../screens/TripExpenses';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import SignInScreen from '../screens/SignInScreen';
-import {useSelector} from 'react-redux';
 
 const Stack = createNativeStackNavigator();
 
 function AppNavigation() {
   const {user} = useSelector(state => state.user);
+
+  const dispatch = useDispatch();
+
+  onAuthStateChanged(auth, userAuth => {
+    console.log('User', userAuth);
+    dispatch(setUser(userAuth));
+  });
 
   if (user) {
     return (

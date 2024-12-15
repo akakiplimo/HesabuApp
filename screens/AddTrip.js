@@ -4,19 +4,42 @@ import ScreenWrapper from '../components/ScreenWrapper';
 import {colors} from '../theme';
 import BackButton from '../components/BackButton';
 import {useNavigation} from '@react-navigation/native';
+import Loading from '../components/Loading';
+import Snackbar from 'react-native-snackbar';
+import {addDoc} from 'firebase/firestore';
+import {tripsRef} from '../config/firebase';
+import {useSelector} from 'react-redux';
 
 export default function AddTrip() {
   const [place, setPlace] = useState('');
   const [country, setCountry] = useState('');
+  const [loading, setLoading] = useState(false);
+  const {user} = useSelector(state => state.user);
 
   const navigation = useNavigation();
 
-  const handleAddTrip = () => {
+  const handleAddTrip = async () => {
     if (place && country) {
       // ready to add trip
-      navigation.navigate('Home');
+      // navigation.navigate('Home');
+      setLoading(true);
+      let doc = await addDoc(tripsRef, {
+        place,
+        country,
+        userId: user.uid,
+      });
+      setLoading(false);
+
+      if (doc && doc.id) {
+        navigation.goBack();
+      }
     } else {
       // Show error
+      setLoading(false);
+      Snackbar.show({
+        text: 'Place & Country are required',
+        backgroundColor: 'red',
+      });
     }
   };
   return (
@@ -60,14 +83,18 @@ export default function AddTrip() {
         </View>
 
         <View>
-          <TouchableOpacity
-            onPress={handleAddTrip}
-            style={{backgroundColor: colors.button}}
-            className="my-6 rounded-full p-3 shadow-sm">
-            <Text className="text-center text-white text-lg font-bold">
-              Add Trip
-            </Text>
-          </TouchableOpacity>
+          {loading ? (
+            <Loading />
+          ) : (
+            <TouchableOpacity
+              onPress={handleAddTrip}
+              style={{backgroundColor: colors.button}}
+              className="my-6 rounded-full p-3 shadow-sm">
+              <Text className="text-center text-white text-lg font-bold">
+                Add Trip
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </ScreenWrapper>

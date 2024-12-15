@@ -19,7 +19,7 @@ export default function WelcomeScreen() {
         <View className="mx-5 mb-20">
           <Text
             className={`text-center font-bold text-4xl ${colors.heading} mb-10`}>
-            Hesabu Poa
+            Hesabu Bora
           </Text>
           <TouchableOpacity
             onPress={() => navigation.navigate('SignIn')}
