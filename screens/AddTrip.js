@@ -1,4 +1,11 @@
-import {Image, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import {
+  Dimensions,
+  Image,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {useState} from 'react';
 import ScreenWrapper from '../components/ScreenWrapper';
 import {colors} from '../theme';
@@ -15,6 +22,9 @@ export default function AddTrip() {
   const [country, setCountry] = useState('');
   const [loading, setLoading] = useState(false);
   const {user} = useSelector(state => state.user);
+
+  const windowWidth = Dimensions.get('window').width;
+  const windowHeight = Dimensions.get('window').height;
 
   const navigation = useNavigation();
 
@@ -58,7 +68,11 @@ export default function AddTrip() {
 
           <View className="flex-row justify-center my-3 mt-5">
             <Image
-              className="w-96 h-96"
+              className={`${
+                windowHeight < 700 && windowWidth < 400
+                  ? 'w-64 h-64'
+                  : 'w-96 h-96'
+              }`}
               source={require('../assets/images/whereto.png')}
             />
           </View>

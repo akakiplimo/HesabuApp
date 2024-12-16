@@ -1,4 +1,5 @@
 import {
+  Dimensions,
   Image,
   Text,
   TextInput,
@@ -22,16 +23,16 @@ export default function SignUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const windowWidth = Dimensions.get('window').width;
+  const windowHeight = Dimensions.get('window').height;
+
   const {userLoading} = useSelector(state => state.user);
 
-  const navigation = useNavigation();
   const dispatch = useDispatch();
 
   const handleSubmit = async () => {
     if (email && password) {
-      // ready to add trip
-      // navigation.goBack();
-      // navigation.navigate('Home');
+      // ready to sign up
       try {
         dispatch(setUserLoading(true));
         await createUserWithEmailAndPassword(auth, email, password);
@@ -67,7 +68,11 @@ export default function SignUp() {
 
           <View className="flex-row justify-center my-3 mt-5">
             <Image
-              className="w-96 h-96"
+              className={`${
+                windowHeight < 700 && windowWidth < 400
+                  ? 'w-64 h-64'
+                  : 'w-96 h-96'
+              }`}
               source={require('../assets/images/register.png')}
             />
           </View>
