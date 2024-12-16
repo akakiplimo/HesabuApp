@@ -1,4 +1,5 @@
 import {
+  Dimensions,
   Image,
   Text,
   TextInput,
@@ -23,14 +24,14 @@ export default function SignIn() {
   const [password, setPassword] = useState('');
   const {userLoading} = useSelector(state => state.user);
 
-  const navigation = useNavigation();
   const dispatch = useDispatch();
+
+  const windowWidth = Dimensions.get('window').width;
+  const windowHeight = Dimensions.get('window').height;
 
   const handleSubmit = async () => {
     if (email && password) {
-      // ready to add trip
-      // navigation.goBack();
-      // navigation.navigate('Home');
+      // ready to sign in
       try {
         dispatch(setUserLoading(true));
         await signInWithEmailAndPassword(auth, email, password);
@@ -66,7 +67,11 @@ export default function SignIn() {
 
           <View className="flex-row justify-center my-3 mt-5">
             <Image
-              className="w-96 h-96"
+              className={`${
+                windowHeight < 700 && windowWidth < 400
+                  ? 'w-64 h-64'
+                  : 'w-96 h-96'
+              }`}
               source={require('../assets/images/login.png')}
             />
           </View>
